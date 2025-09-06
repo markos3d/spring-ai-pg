@@ -1,0 +1,14 @@
+spring.application.name=spring-ai-pg
+spring.ai.ollama.base-url=http://localhost:11434
+spring.ai.ollama.init.pull-model-strategy=when-missing
+spring.ai.ollama.init.timeout=5m
+spring.ai.ollama.chat.options.model=mistral
+spring.ai.ollama.embedding.model=nomic-embed-text
+spring.ai.vectorstore.pgvector.initialize-schema=true
+spring.ai.vectorstore.pgvector.dimensions=768
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/vectordb
+spring.datasource.username=testuser
+spring.datasource.password=testpwd
+
+logging.level.org.springframework.ai.vectorstore=DEBUG
