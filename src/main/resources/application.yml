@@ -4,15 +4,30 @@ spring:
       base-url: http://localhost:11434
       chat:
         options:
-          model: mistral
-          temperature: 0.1          # manje kreativnosti za preciznije odgovore
+          model: llama3.1:8b        # default model (editor neće prijavljivati grešku)
+          temperature: 0.1
           top-p: 0.9
-          num-predict: 1500        # max tokens za odgovor
-          repeat-penalty: 1.1      # izbegava ponavljanje
+          num-predict: 1500
+          repeat-penalty: 1.1
+      models:
+        gemma:
+          model: gemma3:4b-it-qat
+          temperature: 0.1
+          top-p: 0.85
+          num-predict: 1000
+          repeat-penalty: 1.05
+        llama:
+          model: llama3.1:8b
+          temperature: 0.1
+          top-p: 0.9
+          num-predict: 1500
+          repeat-penalty: 1.1
+
       embedding:
         model: nomic-embed-text
         options:
           truncate: true
+
     vectorstore:
       pgvector:
         initialize-schema: true
@@ -39,15 +54,6 @@ spring:
         order_updates: true
     show-sql: false
 
-# Custom properties
-app:
-  rag:
-    ingestion:
-      enabled: true
-      skip-if-exists: true
-    alternative-splitter:
-      enabled: false
-
 # Logging
 logging:
   level:
@@ -56,4 +62,3 @@ logging:
     org.springframework.ai.vectorstore: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-  

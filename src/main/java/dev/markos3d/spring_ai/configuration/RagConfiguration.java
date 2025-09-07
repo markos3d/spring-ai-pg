@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,12 @@ import org.springframework.context.event.EventListener;
 public class RagConfiguration {
     
     private static final Logger log = LoggerFactory.getLogger(RagConfiguration.class);
+
+    @Value("${spring.ai.ollama.chat.options.model}")
+    private String chatModel;
+
+    @Value("${spring.ai.ollama.embedding.model}")
+    private String embeddingModel;
     
     @Bean
     @Primary
@@ -28,11 +35,10 @@ public class RagConfiguration {
             false   // keep separator
         );
     }
-   
     
     @EventListener(ApplicationReadyEvent.class)
     public void logStartupInfo() {
         log.info("RAG application started successfully");
-        log.info("Using Ollama models: chat=mistral, embedding=nomic-embed-text");
+        log.info("Using Ollama models: chat={}, embedding={}", chatModel, embeddingModel);
     }
 }

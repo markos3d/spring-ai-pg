@@ -1,4 +1,4 @@
-package dev.markos3d.spring_ai.ingestion;
+package dev.markos3d.spring_ai.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 @Service
-public class OptimizedDocumetIngestionService implements CommandLineRunner {
+public class DocumentIngestionService implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DocumentIngestionService.class);
 
@@ -26,7 +26,7 @@ public class OptimizedDocumetIngestionService implements CommandLineRunner {
 
     private final VectorStore vectorStore;
 
-    public OptimizedDocumetIngestionService(VectorStore vectorStore) {
+    public DocumentIngestionService(VectorStore vectorStore) {
         this.vectorStore = vectorStore;
     }
 
@@ -42,13 +42,12 @@ public class OptimizedDocumetIngestionService implements CommandLineRunner {
 
             TikaDocumentReader reader = new TikaDocumentReader(resource);
 
-            // Optimizovan text splitter sa boljim parametrima
             TokenTextSplitter textSplitter = new TokenTextSplitter();
 
             List<Document> documents = reader.read();
             log.info("Read {} documents from PDF", documents.size());
 
-            // Obogati metadata pre splittovanja
+            // Set richer metadata
             documents = documents.stream()
                     .map(this::enrichMetadata)
                     .collect(Collectors.toList());
@@ -56,7 +55,7 @@ public class OptimizedDocumetIngestionService implements CommandLineRunner {
             List<Document> chunks = textSplitter.split(documents);
             log.info("Split into {} chunks", chunks.size());
 
-            // Batch ingestion za bolje performanse
+            // Batch ingestion for better performance
             vectorStore.accept(chunks);
 
             log.info("Successfully ingested {} chunks into vector store", chunks.size());
@@ -68,7 +67,7 @@ public class OptimizedDocumetIngestionService implements CommandLineRunner {
     }
 
     private Document enrichMetadata(Document doc) {
-        // Dodaj metadata direktno na postojeći dokument
+      // Add metadata directly to the existing document
         doc.getMetadata().put("source", "spring-boot-reference");
         doc.getMetadata().put("ingestion_date", LocalDateTime.now().toString());
         doc.getMetadata().put("document_type", "technical_documentation");
@@ -79,25 +78,24 @@ public class OptimizedDocumetIngestionService implements CommandLineRunner {
             doc.getMetadata().put("page", doc.getMetadata().get("page_number"));
         }
 
-        // Vrati isti dokument sa obogaćenim metadata
+        // Return the same document with enriched metadata
         return doc;
     }
 
     private boolean isDocumentAlreadyIngested() {
-        // Jednostavna provera - možete proširiti prema potrebi
-        // try {
-        //     SearchRequest searchRequest = SearchRequest.builder()
-        //             .topK(1)
-        //             .similarityThreshold(0.9)
-        //             .filterExpression("source == 'spring-boot-reference'")
-        //             .build();
+        // Simple check - you can extend as needed
+        try {
+            SearchRequest searchRequest = SearchRequest.builder()
+                    .topK(1)
+                    // .similarityThreshold(0.9)
+                    .filterExpression("source == 'spring-boot-reference'")
+                    .build();
 
-        //     List<Document> existing = vectorStore.similaritySearch(searchRequest);
-        //     return !existing.isEmpty();
-        // } catch (Exception e) {
-        //     log.warn("Could not check for existing documents", e);
-        //     return false;
-        // }
-        return true;
+            List<Document> existing = vectorStore.similaritySearch(searchRequest);
+            return !existing.isEmpty();
+        } catch (Exception e) {
+            log.warn("Could not check for existing documents", e);
+            return false;
+        }
     }
 }
